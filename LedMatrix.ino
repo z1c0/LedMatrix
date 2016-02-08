@@ -23,10 +23,32 @@ uint16_t currentColor = 0;
 class Game
 {
 public:
+  struct Point
+  {
+    Point() : x(0), y(0) {}
+    byte x;
+    byte y;  
+  };
   virtual void init() = 0;
   virtual void simulate() = 0;
   virtual unsigned long getInterval() = 0;
   virtual uint16_t mapColor(byte x, byte y) { return world[x][y]; };
+
+protected:
+  Point getRandomPos()
+  {
+    Point pt;
+    while (true)
+    {
+      pt.x = random(0, DIM);
+      pt.y = random(0, DIM);
+      if (world[pt.x][pt.y] == 0)
+      {
+        break;
+      }
+    }
+    return pt;
+  }
 };
 
 class Life : public Game
@@ -43,12 +65,6 @@ private:
 
 class Snake : public Game
 {
-  struct Point
-  {
-    Point() : x(0), y(0) {}
-    byte x;
-    byte y;  
-  };
 public:
   Snake() : mGrow(0) {}
   virtual void init() override;
@@ -57,8 +73,9 @@ public:
   virtual uint16_t mapColor(byte x, byte y) override;
 
 private:
-  Point getRandomPos();
+  void move();
   void moveCell(Point& cell);
+  bool checkMove(Point cell, uint16_t dir);
   
   Point mHead;
   Point mTail;

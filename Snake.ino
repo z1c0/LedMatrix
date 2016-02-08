@@ -6,30 +6,24 @@
 #define FOOD 20
 #define WALL 30
 
-/*  
- function shuffle(o) {
- for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
- return o;
- }*/
-
-Snake::Point Snake::getRandomPos()
+Game::Point shuffle(byte value1, byte value2)
 {
-  Snake::Point pt;
-  while (true) {
-    pt.x = random(0, DIM);
-    pt.y = random(0, DIM);
-    if (world[pt.x][pt.y] == VOID)
-    {
-      break;
-    }
+  if (random(100) > 50)
+  {
+    auto tmp = value1;
+    value1 = value2;
+    value2 = tmp;
   }
+  Game::Point pt;
+  pt.x = value1;
+  pt.y = value2;
   return pt;
 }
 
 unsigned long Snake::getInterval()
 {
   return 300;
-}    
+}
 
 void Snake::init()
 {
@@ -49,7 +43,7 @@ void Snake::init()
   // snake
   byte x = random(5, DIM - 10);
   byte y = random(2, DIM - 2);
-  mTail.x = x; 
+  mTail.x = x;
   mTail.y = y;
   world[x][y] = SNAKE_RIGHT;
   x++;
@@ -73,118 +67,122 @@ uint16_t Snake::mapColor(byte x, byte y)
     case SNAKE_LEFT:
     case SNAKE_RIGHT:
       return matrix.Color333(0, 6, 0);
- 
+
     case FOOD:
       return matrix.Color333(6, 6, 0);
- 
+
     case WALL:
       return matrix.Color333(0, 0, 6);
   }
   return 0;
 }
- 
-/*
- checkMove : function(cell, dir) {
- var tmp = cell.slice();
- this.setCellValue(tmp, dir);
- var v = this.getCellValue(this.moveCell(tmp));
- return (v == VOID || v == FOOD);
- },
- 
- 
- simulate : function() {
- var dir = this.getCellValue(this.head);
- // steer to food
- var dx = this.food[0] - this.head[0];
- var dy = this.food[1] - this.head[1];
- if (dx != 0) {
- if (dir == SNAKE_UP || dir == SNAKE_DOWN) {
- dir = (dx < 0) ? SNAKE_LEFT : SNAKE_RIGHT;
- } 
- }
- if (dy != 0) {
- if (dir == SNAKE_LEFT || dir == SNAKE_RIGHT) {
- dir = (dy < 0) ? SNAKE_UP : SNAKE_DOWN;
- }
- }
- this.setCellValue(this.head, dir);
- 
- // check
- dir = this.getCellValue(this.head);
- if (!this.checkMove(this.head, dir)) {
- var o = [];
- if (dir == SNAKE_UP || dir == SNAKE_DOWN) {
- o = shuffle([SNAKE_LEFT, SNAKE_RIGHT]);
- } 
- else {
- o = shuffle([SNAKE_UP, SNAKE_DOWN]);
- }
- if (!this.checkMove(this.head, o[0])) {
- this.checkMove(this.head, o[1]);
- }
- }
- 
- // move
- this.move();
- },
- */
- 
-void Snake::moveCell(Snake::Point& cell)
+
+bool Snake::checkMove(Point cell, uint16_t dir)
 {
- uint16_t value = world[cell.x][cell.y];
- switch (dir)
- {
-   case SNAKE_UP:
-   cell[1]--;
-   break;
-   case SNAKE_DOWN:
-   cell[1]++;
-   break;
-   case SNAKE_LEFT:
-   cell[0]--;
-   break;
-   case SNAKE_RIGHT:
-   cell[0]++;
-   break;
- }
- //return cell;
+  world[cell.x][cell.y] = dir;
+  moveCell(cell);
+  uint16_t v = world[cell.x][cell.y];
+  return (v == VOID || v == FOOD);
 }
 
-/*
- 
- /*
- move : function() {
- debugger;
- if (this.grow == 0) {
- // move tail
- var oldTail = this.tail.slice();
- this.moveCell(this.tail);
- this.setCellValue(oldTail, VOID);
- }
- else {
- this.grow--;
- }
- // move head
- var vOld = this.getCellValue(this.head);
- var newHead = this.moveCell(this.head);
- var v = this.getCellValue(newHead);
- switch(v) {
- case FOOD:
- this.food = this.getRandomPos();
- this.setCellValue(this.food, FOOD);
- this.grow = 3;
- // fall through
- 
- case VOID:
- this.head = newHead;
- this.setCellValue(this.head, vOld);
- break;
- 
- default:
- this.reset();
- }
- }
- };
- }
- */
+void Snake::simulate()
+{
+  auto dir = world[mHead.x][mHead.y];
+  // steer to food
+  auto dx = mFood.x - mHead.x;
+  auto dy = mFood.y - mHead.y;
+  if (dx != 0) 
+  {
+    if (dir == SNAKE_UP || dir == SNAKE_DOWN)
+    {
+      dir = (dx < 0) ? SNAKE_LEFT : SNAKE_RIGHT;
+    }
+  }
+  if (dy != 0)
+  {
+    if (dir == SNAKE_LEFT || dir == SNAKE_RIGHT) 
+    {
+      dir = (dy < 0) ? SNAKE_UP : SNAKE_DOWN;
+    }
+  }
+  world[mHead.x][mHead.y] = dir;
+
+  // check
+  if (!checkMove(mHead, dir))
+  {
+    Point o;
+    if (dir == SNAKE_UP || dir == SNAKE_DOWN)
+    {
+      o = shuffle(SNAKE_LEFT, SNAKE_RIGHT);
+    }
+    else
+    {
+      o = shuffle(SNAKE_UP, SNAKE_DOWN);
+    }
+    if (!checkMove(mHead, o.x))
+    {
+      checkMove(mHead, o.y);
+    }
+  }
+  // move
+  move();
+}
+
+void Snake::moveCell(Snake::Point& cell)
+{
+  uint16_t value = world[cell.x][cell.y];
+  switch (value)
+  {
+    case SNAKE_UP:
+      cell.y--;
+      break;
+
+    case SNAKE_DOWN:
+      cell.y++;
+      break;
+
+    case SNAKE_LEFT:
+      cell.x--;
+      break;
+
+    case SNAKE_RIGHT:
+      cell.x++;
+      break;
+  }
+  //return cell;
+}
+
+void Snake::move()
+{
+  if (mGrow == 0) 
+  {
+    // move tail
+    auto oldTail = mTail;
+    moveCell(mTail);
+    world[oldTail.x][oldTail.y] = VOID;
+  }
+  else 
+  {
+    mGrow--;
+  }
+  // move head
+  uint16_t vOld = world[mHead.x][mHead.y];
+  moveCell(mHead);
+  uint16_t v = world[mHead.x][mHead.y];
+  switch(v)
+  {
+    case FOOD:
+      mFood = getRandomPos();
+      world[mFood.x][mFood.y] = FOOD;
+      mGrow = 3;
+      // fall through
+      
+    case VOID:     
+      world[mHead.x][mHead.y] = vOld;
+      break;
+  
+    default:
+      init();
+  }
+}
 
