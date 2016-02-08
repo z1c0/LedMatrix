@@ -25,6 +25,7 @@ unsigned long Life::getInterval()
 void Life::init()
 {
   mLastChanged = 0;
+  mCountDown = 0;
 
   uint16_t color = getColor(true);
 
@@ -127,9 +128,13 @@ void Life::simulate()
   //
   // Re-populate the world?
   //
+  Serial.print("changed: ");
+  Serial.println(changed);
+  Serial.print("mCountDown: ");
+  Serial.println(mCountDown);
+  
   if (changed == 0 || mCountDown <= 0)
   {
-    delay(2000); // dramatic pause
     initWorld();
   }
 }

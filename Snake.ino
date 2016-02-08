@@ -69,7 +69,7 @@ uint16_t Snake::mapColor(byte x, byte y)
       return matrix.Color333(0, 6, 0);
 
     case FOOD:
-      return matrix.Color333(6, 6, 0);
+      return matrix.Color333(6, 0, 0);
 
     case WALL:
       return matrix.Color333(0, 0, 6);
@@ -149,7 +149,6 @@ void Snake::moveCell(Snake::Point& cell)
       cell.x++;
       break;
   }
-  //return cell;
 }
 
 void Snake::move()
@@ -182,7 +181,7 @@ void Snake::move()
       break;
   
     default:
-      init();
+      initWorld();
   }
 }
 

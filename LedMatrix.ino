@@ -84,7 +84,24 @@ private:
 };
 
 
-Game* game = new Life();
+Life life;
+Snake snake;
+Game* pGame = NULL;
+
+void chooseGame()
+{
+  auto n = random(100);
+  if (n < 50)
+  {
+    pGame = &snake;
+  }
+  else
+  {
+    pGame = &life;
+  }
+}
+
+
 
 uint8_t getColorVal()
 {
@@ -141,6 +158,8 @@ uint16_t getColor(bool newColor)
 
 void initWorld()
 {
+  chooseGame();
+  
   uint16_t color = getColor(true);
   // swipe left to right
   for (int c = 0;  c < DIM; c++)
@@ -153,8 +172,18 @@ void initWorld()
     matrix.swapBuffers(true);
     delay(WAIT_SWIPE);
   }
+
+  // init world
+  for (int r = 0; r < DIM; r++)
+  {
+    for (int c = 0;  c < DIM; c++)
+    {
+      world[r][c] = 0;
+      copyWorld[r][c] = 0;
+    }
+  } 
   
-  game->init();
+  pGame->init();
     
   // swipe right to left
   for (int c = DIM - 1;  c >= 0; c--)
@@ -162,7 +191,7 @@ void initWorld()
     for (int r = 0; r < DIM; r++)
     {
       matrix.drawPixel(max(0, c - 1), r, color);
-      matrix.drawPixel(c, r, world[r][c]);
+      matrix.drawPixel(c, r, pGame->mapColor(r, c));
     }
     matrix.swapBuffers(true);
     delay(WAIT_SWIPE);
@@ -172,7 +201,7 @@ void initWorld()
 void setup()
 {
   Serial.begin(9600);
-  Serial.println("Hello LedLife");
+  Serial.println("*** LED MATRIX ***");
   int seed = analogRead(11);
   delay(seed % 9);
   seed = seed * millis();
@@ -188,10 +217,8 @@ void render()
   {
     for (byte c = 0;  c < DIM; c++)
     {
-      if (world[r][c] != 0)
-      {
-        //matrix.drawPixel(c, r, color);        
-      }
+      auto color = pGame->mapColor(r, c);
+      matrix.drawPixel(c, r, color);        
     }
   }
   matrix.swapBuffers(true);
@@ -200,6 +227,6 @@ void render()
 void loop()
 {
   render();
-  delay(game->getInterval());
-  game->simulate();
+  delay(pGame->getInterval());
+  pGame->simulate();
 }
