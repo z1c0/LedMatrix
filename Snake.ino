@@ -5,6 +5,7 @@
 #define SNAKE_RIGHT 13
 #define FOOD 20
 #define WALL 30
+#define GROWBY 4
 
 Game::Point shuffle(byte value1, byte value2)
 {
@@ -25,7 +26,7 @@ unsigned long Snake::getInterval()
   return 300;
 }
 
-void Snake::init()
+void Snake::onInit()
 {
   // walls;
   for (byte i = 0; i < DIM; i++)
@@ -173,7 +174,7 @@ void Snake::move()
     case FOOD:
       mFood = getRandomPos();
       world[mFood.x][mFood.y] = FOOD;
-      mGrow = 3;
+      mGrow = GROWBY;
       // fall through
       
     case VOID:     
@@ -181,7 +182,7 @@ void Snake::move()
       break;
   
     default:
-      initWorld();
+      mIsOver = true;
   }
 }
 

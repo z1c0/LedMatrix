@@ -25,16 +25,29 @@ class Game
 public:
   struct Point
   {
+    Point(byte x, byte y) : x(x), y(y) {}
     Point() : x(0), y(0) {}
     byte x;
     byte y;  
   };
-  virtual void init() = 0;
+  virtual void init()
+  {
+    mIsOver = false;
+    onInit();
+  }
   virtual void simulate() = 0;
   virtual unsigned long getInterval() = 0;
+  virtual bool isOver() const { return mIsOver; }
   virtual uint16_t mapColor(byte x, byte y) { return world[x][y]; };
 
 protected:
+  virtual void onInit() = 0;
+  
+  bool getRandomBool()
+  {
+    return random(2) == 1; 
+  }
+  
   Point getRandomPos()
   {
     Point pt;
@@ -49,15 +62,18 @@ protected:
     }
     return pt;
   }
+  
+  bool mIsOver;  
 };
 
 class Life : public Game
 {
 public:
   Life() : mCountDown(0), mLastChanged(0) {}
-  virtual void init() override;
+  virtual void onInit() override;
   virtual void simulate() override;
   virtual unsigned long getInterval() override;
+
 private:
   uint16_t mCountDown;
   uint16_t mLastChanged;
@@ -67,7 +83,7 @@ class Snake : public Game
 {
 public:
   Snake() : mGrow(0) {}
-  virtual void init() override;
+  virtual void onInit() override;
   virtual void simulate() override;
   virtual unsigned long getInterval() override;
   virtual uint16_t mapColor(byte x, byte y) override;
@@ -83,24 +99,50 @@ private:
   byte mGrow;
 };
 
+class TicTacToe : public Game
+{
+public:
+  TicTacToe() {}
+  virtual void onInit() override;
+  virtual void simulate() override;
+  virtual unsigned long getInterval() override;
+  virtual uint16_t mapColor(byte x, byte y) override;
+  virtual bool isOver() const override;
+
+private:
+  void reset();
+  void draw(byte col, byte row, byte what);
+  void checkIfOver();
+  Game::Point checkLine(Game::Point* cells, bool mark);
+  byte evaluateLine(byte what, Game::Point* cells);
+  Game::Point getNextPos(byte what);
+  
+  byte mRoundsToPlay;
+  byte mState;
+  bool mPlaySmart;
+  bool mPlayerOne;
+};
+
 
 Life life;
 Snake snake;
+TicTacToe tictactoe;
 Game* pGame = NULL;
+
 
 void chooseGame()
 {
-  auto n = random(100);
-  if (n < 50)
+  auto n = random(3);
+  switch (n)
   {
-    pGame = &snake;
-  }
-  else
-  {
-    pGame = &life;
+    case 0:
+      pGame = &snake;
+    case 1:
+      pGame = &tictactoe;    
+    default:
+      pGame = &life;
   }
 }
-
 
 
 uint8_t getColorVal()
@@ -229,4 +271,8 @@ void loop()
   render();
   delay(pGame->getInterval());
   pGame->simulate();
+  if (pGame->isOver())
+  {
+    initWorld();
+  }  
 }

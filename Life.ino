@@ -22,7 +22,7 @@ unsigned long Life::getInterval()
   return 700;
 }
   
-void Life::init()
+void Life::onInit()
 {
   mLastChanged = 0;
   mCountDown = 0;
@@ -138,7 +138,7 @@ void Life::simulate()
   
   if (changed == 0 || mCountDown <= 0)
   {
-    initWorld();
+    mIsOver = true;
   }
 }
 
