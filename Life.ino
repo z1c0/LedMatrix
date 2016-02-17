@@ -34,6 +34,7 @@ void Life::init()
   {
     for (int c = 0;  c < DIM; c++)
     {
+      copyWorld[r][c] = 0;
       world[r][c] = random(1000) > 700 ? getColor(false) : 0;
     }
   }
@@ -109,14 +110,16 @@ void Life::simulate()
   {
     for (byte c = 0;  c < DIM; c++)
     {
-      if (world[r][c] != copyWorld[r][c])
+      bool b1(world[r][c] != 0);
+      bool b2(copyWorld[r][c] != 0);
+      if (b1 != b2)
       {
         world[r][c] = copyWorld[r][c];
         changed++;
       }
     }
   }
-  if (changed == mLastChanged)
+  if (abs(changed - mLastChanged) < 2)
   {
     mCountDown--;
   }
