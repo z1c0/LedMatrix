@@ -137,10 +137,15 @@ void chooseGame()
   {
     case 0:
       pGame = &snake;
+      break;
+      
     case 1:
       pGame = &tictactoe;    
+      break;
+      
     default:
       pGame = &life;
+      break;
   }
 }
 

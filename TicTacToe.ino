@@ -271,7 +271,7 @@ uint16_t TicTacToe::mapColor(byte x, byte y)
       return matrix.Color333(7, 7, 7);
 
     case CIRCLE:
-      return mPlaySmart ? matrix.Color333(0, 6, 0) : matrix.Color333(0, 0, 7);
+      return mPlaySmart ? matrix.Color333(0, 6, 0) : matrix.Color333(0, 7, 7);
 
     case CROSS:
       return mPlaySmart ? matrix.Color333(0, 0, 6) : matrix.Color333(7, 0, 4);
