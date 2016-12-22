@@ -123,16 +123,28 @@ private:
   bool mPlayerOne;
 };
 
+class Xmas : public Game
+{
+public:
+  Xmas () {}
+  virtual void onInit() override;
+  virtual void simulate() override;
+  virtual unsigned long getInterval() override;
+  virtual uint16_t mapColor(byte x, byte y) override;
+  virtual bool isOver() const override;
+};
+
 
 Life life;
 Snake snake;
 TicTacToe tictactoe;
+Xmas xmas;
 Game* pGame = NULL;
 
 
 void chooseGame()
 {
-  auto n = random(3);
+  auto n = random(4);
   switch (n)
   {
     case 0:
@@ -142,11 +154,16 @@ void chooseGame()
     case 1:
       pGame = &tictactoe;    
       break;
+
+    case 2:
+      pGame = &xmas;
+      break;
       
     default:
       pGame = &life;
       break;
   }
+  pGame = &xmas;
 }
 
 
