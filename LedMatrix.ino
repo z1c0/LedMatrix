@@ -22,6 +22,7 @@ uint16_t currentColor = 0;
 
 class Game
 {
+  friend void loop();
 public:
   struct Point
   {
@@ -32,14 +33,20 @@ public:
   };
   virtual void init()
   {
-    mIsOver = false;
+    _isOver = false;
+    _rounds = 0;
     onInit();
   }
   virtual void simulate() = 0;
   virtual unsigned long getInterval() = 0;
-  virtual bool isOver() const { return mIsOver; }
-  virtual uint16_t mapColor(byte x, byte y) { return world[x][y]; };
+  virtual bool isOver() const { return _isOver; }
+  virtual uint16_t mapColor(byte x, byte y) { return world[x][y]; }
 
+  static uint16_t rgb(byte r, byte g, byte b)
+  {
+    return matrix.Color333(r / 32, g / 32, b / 32);
+  }
+  
 protected:
   virtual void onInit() = 0;
   
@@ -62,8 +69,9 @@ protected:
     }
     return pt;
   }
-  
-  bool mIsOver;  
+
+  bool _isOver;  
+  uint16_t _rounds;
 };
 
 class Life : public Game
@@ -134,17 +142,38 @@ public:
   virtual bool isOver() const override;
 };
 
+class Fire : public Game
+{
+public:
+  Fire () : _firePixels(reinterpret_cast<int16_t>(copyWorld)) {}
+  virtual void onInit() override;
+  virtual void simulate() override;
+  virtual unsigned long getInterval() override;
+  virtual uint16_t mapColor(byte x, byte y) override;
+  virtual bool isOver() const override;
+
+private:
+  bool isGoingOut() const;
+  void doFire();
+  void spreadFire(uint16_t src);
+  void setBottomRow(uint16_t col);
+  
+  int16_t* _firePixels;
+};
+
+
 
 Life life;
 Snake snake;
 TicTacToe tictactoe;
 Xmas xmas;
-Game* pGame = NULL;
+Fire fire;
+Game* pGame = nullptr;
 
 
 void chooseGame()
 {
-  auto n = random(4);
+  auto n = random(5);
   switch (n)
   {
     case 0:
@@ -159,11 +188,15 @@ void chooseGame()
       pGame = &xmas;
       break;
       
+    case 3:
+      pGame = &fire;
+      break;
+      
     default:
       pGame = &life;
       break;
   }
-  pGame = &xmas;
+  //pGame = &fire;
 }
 
 
@@ -293,6 +326,7 @@ void loop()
   render();
   delay(pGame->getInterval());
   pGame->simulate();
+  pGame->_rounds++;
   if (pGame->isOver())
   {
     initWorld();

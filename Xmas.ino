@@ -1,9 +1,3 @@
-uint16_t rgb(byte r, byte g, byte b)
-{
-  //return matrix.Color333(7, 0, 0);
-  return matrix.Color333(r / 32, g / 32, b / 32);
-}
-
 void Xmas::onInit()
 {
 world[3][4] = rgb(0,204,0);
@@ -480,6 +474,6 @@ uint16_t Xmas::mapColor(byte x, byte y)
 
 bool Xmas::isOver() const
 {
-  return false;
+  return _rounds >= 200;
 }
 

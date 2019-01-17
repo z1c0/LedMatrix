@@ -182,7 +182,7 @@ void Snake::move()
       break;
   
     default:
-      mIsOver = true;
+      _isOver = true;
   }
 }
 

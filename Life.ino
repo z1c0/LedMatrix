@@ -138,7 +138,7 @@ void Life::simulate()
   
   if (changed == 0 || mCountDown <= 0)
   {
-    mIsOver = true;
+    _isOver = true;
   }
 }
 
